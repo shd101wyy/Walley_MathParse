@@ -44,6 +44,29 @@
  
  */
 
+double Walley_Operator(double num1,double num2,char sign){
+    double output=0;
+    if (sign == '*') {
+        output = num1*num2;
+    } else if (sign == '/') {
+        output = num1 / num2;
+    } else if (sign == '\\') {
+        output = num2 / num1;
+    } else if (sign == '%'){
+        output=((int)num1)%((int)num2);
+    } else if (sign == '^'){
+        output=pow(num1,num2);
+    } else if (sign == '+') {
+        output = num1 + num2;
+    } else if (sign == '-') {
+        output = num1-num2;
+    } else {
+        printf("Mistake Occurred while calling function Walley_Operator");
+        output=0;
+    }
+    return output;
+}
+
 
 // put coeffiecient ahead a*3--> 3*a
 // put 3+a---> a+3
@@ -89,7 +112,7 @@ int indexOfFirstSignFromBehind(char *input_str){
 
 
 char *Walley_Math_Operator(char *value1, char *value2, char sign){
-    printf("%s %s %c\n",value1,value2,sign);
+    printf("decimal %s %s %c\n",value1,value2,sign);
     if (stringIsDigit(value1)==TRUE) {
         
         // both value1 and value2 is digit
@@ -207,7 +230,7 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
 
 
 char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
-    printf("%s %s %c\n",value1,value2,sign);
+    printf("fraction %s %s %c\n",value1,value2,sign);
     if (stringIsDigit(value1)==TRUE) {
         
         // both value1 and value2 is digit

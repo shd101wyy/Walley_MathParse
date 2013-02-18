@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "walley_math_parser.h"
 int main(int argc, char **argv){
-    CURRENT_INPUT_STR="3+3*4/15*a+5";
+    CURRENT_INPUT_STR="3^4*a/18";
     struct TOKEN *token=Walley_MATH_Lexica_Analysis(CURRENT_INPUT_STR);
     TOKEN_PrintTOKEN(token);
     char *postfix=WALLEY_MATH_Infix_to_Postfix(token);

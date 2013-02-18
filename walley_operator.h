@@ -200,29 +200,7 @@ bool hasFirstOrderSignExist(char *input_str){
     return has_sign;
 }
 
-double Walley_Operator(double num1,double num2,char sign){
-    double output=0;
-    if (sign == '*') {
-        output = num1*num2;
-    } else if (sign == '/') {
-        output = num1 / num2;
-    } else if (sign == '\\') {
-            output = num2 / num1;
-    } else if (sign == '%'){
-        output=((int)num1)%((int)num2);
-    } else if (sign == '^'){
-        output=pow(num1,num2);
-    } else if (sign == '+') {
-        output = num1 + num2;
-    } else if (sign == '-') {
-        output = num1-num2;
-    } else {
-        printf("Mistake Occurred while calling function Walley_Operator");
-        output=0; 
-    }
-    return output;
-}
-
+double Walley_Operator(double num1,double num2,char sign);
 char* countFromExpression(char *var_value) {
 
     if (hasSign(var_value) == FALSE){
