@@ -109,7 +109,37 @@ int indexOfFirstSignFromBehind(char *input_str){
     return -1;
 }
 
-
+int find_not_in_parenthesis(char *from_str, char *find_str) {
+    int index = -1;
+    bool find_index = TRUE;
+    int i;
+    int j;
+    for (i = 0; i < (int) strlen(from_str); i++) {
+        // I add one code here.
+        find_index=TRUE;
+        if (from_str[i] == find_str[0] && charIsInParenthesis(from_str,i)==FALSE) {
+            //printf("Find The same\n");
+            //printf("%c\n",from_str[i]);
+            //char *temp = substr(from_str, i, i + (int) strlen(find_str));
+            //printf("############%d\n",i);
+            for (j = 0; j < (int) strlen(find_str); j++) {
+                //printf("Find_Str[j] %c From_Str[i+j] %c\n",find_str[j],from_str[i+j]);
+                if (find_str[j] != from_str[i + j]) {
+                    //printf("!= %d %d\n",j,j+i);
+                    find_index = FALSE;
+                    break;
+                }
+            }
+            if (find_index == TRUE) {
+                //find_index = TRUE;
+                //printf("Fin_Index--->%d\n",i);
+                index = i;
+                break;
+            }
+        }
+    }
+    return index;
+}
 
 char *Walley_Math_Operator(char *value1, char *value2, char sign){
     printf("decimal %s %s %c\n",value1,value2,sign);
@@ -130,28 +160,44 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
                 // + -
                 if (sign=='+'||sign=='-') {
                     int index_of_first_sign=indexOfFirstSign(value2);
-                    if (value2[index_of_first_sign]=='+'||value2[index_of_first_sign]=='-') {
-                        char *value3=substr(value2, 0, index_of_first_sign);
-                        value2=substr(value2, index_of_first_sign, (int)strlen(value2));
-                        value3=Walley_Math_Operator(value1, value3, sign);
-                        return append(value3, value2);
+                    if (WALLEY_MATH_signOrder(value2[index_of_first_sign])==WALLEY_MATH_signOrder(sign)) {
+                        if (value2[index_of_first_sign]=='+'||value2[index_of_first_sign]=='-') {
+                            char *value3=substr(value2, 0, index_of_first_sign);
+                            value2=substr(value2, index_of_first_sign, (int)strlen(value2));
+                            value3=Walley_Math_Operator(value1, value3, sign);
+                            return append(value3, value2);
+                        }
+                        else{
+                            return append(value2, append(charToString(sign), value1));
+                        }
                     }
                     else{
-                        return append(value2, append(charToString(sign), value1));
+                        if (sign=='+') {
+                            return append(value2, append(charToString(sign), value1));
+
+                        }
+                        return append(value1, append(charToString(sign), value2));
                     }
                 }
                 // * / % ^
                 else{
                     int index_of_first_sign=indexOfFirstSign(value2);
-                    if (value2[index_of_first_sign]=='*'||value2[index_of_first_sign]=='/'||value2[index_of_first_sign]=='%') {
-                        char *value3=substr(value2, 0, index_of_first_sign);
-                        value2=substr(value2, index_of_first_sign, (int)strlen(value2));
-                        value3=Walley_Math_Operator(value1, value3, sign);
-                        return append(value3, value2);
+                    if (WALLEY_MATH_signOrder(value2[index_of_first_sign])==WALLEY_MATH_signOrder(sign)&&(find_not_in_parenthesis(value2, "+")==-1&&find_not_in_parenthesis(value2, "-")==-1)) {
+
+                        if (value2[index_of_first_sign]=='*'||value2[index_of_first_sign]=='/'||value2[index_of_first_sign]=='%') {
+                            char *value3=substr(value2, 0, index_of_first_sign);
+                            value2=substr(value2, index_of_first_sign, (int)strlen(value2));
+                            value3=Walley_Math_Operator(value1, value3, sign);
+                            return append(value3, value2);
+                        }
+                        else{
+                            value2=append("(", append(value2, ")"));
+                            return append(value1, append(charToString(sign), value2));
+                        }
                     }
                     else{
                         value2=append("(", append(value2, ")"));
-                        return append(value1, append(charToString(sign), value2));
+                        return append(value1,append(charToString(sign),value2));
                     }
 
                 }
@@ -173,11 +219,16 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
                 // + -
                 if (sign=='+'||sign=='-') {
                     int index_of_first_sign=indexOfFirstSignFromBehind(value1);
-                    if (value1[index_of_first_sign]=='+'||value1[index_of_first_sign]=='-') {
-                        char *value3=substr(value1, index_of_first_sign+1, (int)strlen(value1));
-                        value1=substr(value1, 0,index_of_first_sign+1);
-                        value3=Walley_Math_Operator(value3, value2, sign);
-                        return append(value1, value3);
+                    if (WALLEY_MATH_signOrder(value1[index_of_first_sign])==WALLEY_MATH_signOrder(sign)) {
+                        if (value1[index_of_first_sign]=='+'||value1[index_of_first_sign]=='-') {
+                            char *value3=substr(value1, index_of_first_sign+1, (int)strlen(value1));
+                            value1=substr(value1, 0,index_of_first_sign+1);
+                            value3=Walley_Math_Operator(value3, value2, sign);
+                            return append(value1, value3);
+                        }
+                        else{
+                            return append(value1, append(charToString(sign), value2));
+                        }
                     }
                     else{
                         return append(value1, append(charToString(sign), value2));
@@ -185,13 +236,20 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
                 }
                 // * / % ^
                 else{
-                    int index_of_first_sign=indexOfFirstSignFromBehind(value1);
-                    if (value1[index_of_first_sign]=='*'||value1[index_of_first_sign]=='/'||value1[index_of_first_sign]=='%') {
-                        char *value3=substr(value1, 0, index_of_first_sign);
-                        value1=substr(value1, index_of_first_sign,(int)strlen(value1));
-                        value3=Walley_Math_Operator(value3, value2, sign);
-                        return append(value3, value1);
+                    int index_of_first_sign=indexOfFirstSign(value1);
+                    if (WALLEY_MATH_signOrder(value1[index_of_first_sign])==WALLEY_MATH_signOrder(sign)&&(find_not_in_parenthesis(value1, "+")==-1&&find_not_in_parenthesis(value1, "-")==-1)) {
+                        if (value1[index_of_first_sign]=='*'||value1[index_of_first_sign]=='/'||value1[index_of_first_sign]=='%') {
+                            char *value3=substr(value1, 0, index_of_first_sign);
+                            value1=substr(value1, index_of_first_sign,(int)strlen(value1));
+                            value3=Walley_Math_Operator(value3, value2, sign);
+                            return append(value3, value1);
+                        }
+                        else{
+                            value1=append("(", append(value1, ")"));
+                            return append(value2, append(charToString(sign), value1));
+                        }
                     }
+                    
                     else{
                         value1=append("(", append(value1, ")"));
                         return append(value2, append(charToString(sign), value1));
@@ -209,16 +267,24 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
             if (stringHasSign(value1)&&stringHasSign(value2)) {
                 int index1=indexOfFirstSignFromBehind(value1);
                 int index2=indexOfFirstSign(value2);
-                char *value3=substr(value1, index1+1, (int)strlen(value1));
-                value1=substr(value1, 0, index1+1);
-                char *value4=substr(value2, 0, index2);
-                value2=substr(value2, index2, (int)strlen(value2));
-                char *value=Walley_Math_Operator(value3, value4, sign);
-                return append(value1,append(value, value2));
+           
+                if (WALLEY_MATH_signOrder(value1[index1])==WALLEY_MATH_signOrder(value2[index2]) && WALLEY_MATH_signOrder(value1[index1])==sign) {
+                    char *value3=substr(value1, index1+1, (int)strlen(value1));
+                    value1=substr(value1, 0, index1+1);
+                    char *value4=substr(value2, 0, index2);
+                    value2=substr(value2, index2, (int)strlen(value2));
+                    char *value=Walley_Math_Operator(value3, value4, sign);
+                    return append(value1,append(value, value2));
+                }
+                else{
+                    return append(value1, append(charToString(sign), value2));
+                }
+                
+                
             }
             else if(strcmp(value1, value2)==0){
                 if (sign=='+') {
-                    return append(value1, "*2");
+                    return append("2*",value1);
                 }
                 else
                     return "0";
@@ -370,6 +436,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
             }
                         
             char *output_str=Walley_Math_Operator(value2,value1, temp_str[0]);
+            printf("----> %s\n",output_str);
             Str_addString(&stack, output_str);
             
         }

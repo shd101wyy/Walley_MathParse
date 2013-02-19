@@ -194,7 +194,7 @@ struct TOKEN* Walley_MATH_Lexica_Analysis(char *input_str){
     int end=0;
     char type='b'; // 'i' for id, 'b' for blank 's' sign(operator), 'p' for ()
 
-    if (isalpha(input_str[0])) {
+    if (isalpha(input_str[0])||isdigit(input_str[0])) {
         type='i';
     }
     else if(input_str[0]=='('||input_str[0]==')')
