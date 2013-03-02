@@ -196,8 +196,13 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                         
                     }
                     else{
-                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
-                        
+                        // b/b
+                        if (strcmp(md.value, (*mdl).math_data_list[length-1].value)==0) {
+                            (*mdl).math_data_list[length-1].value="0";
+                        }
+                        else{
+                            (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
+                        }
                     }
                     
                 }
@@ -716,15 +721,17 @@ char *Walley_Math_Parser_Decimal(char *input_str){
         end=find_from_index(input_str, " ", start);
     }
     
-    MDL_changeMathDataListToString(MDA.mdl[0]);
-    
-    return cleanDotZeroAfterNum(Str_PopString(&stack));
+    char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
+    //return cleanDotZeroAfterNum(Str_PopString(&stack));
+    return output;
 }
 
 
 
 
 char *Walley_Math_Parser_Fraction(char *input_str){
+    MDA_init(&MDA);
+
     int start=0;
     int end=find(input_str, " ");
     char **stack;
@@ -813,5 +820,7 @@ char *Walley_Math_Parser_Fraction(char *input_str){
         end=find_from_index(input_str, " ", start);
     }
     
-    return cleanDotZeroAfterNum(Str_PopString(&stack));
+    char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
+    //return cleanDotZeroAfterNum(Str_PopString(&stack));
+    return output;
 }
