@@ -8,8 +8,50 @@
 
 #include <stdio.h>
 #include "walley_math_parser.h"
+
+// b+3*a*3   ->  b 3 a * 3 * +
+// (b+3*a)*3 ->  b 3 a * + 3 *
+// b+3*a*3+b ->  b 3 a * 3 * + b +
+// a+b+a     ->  a b + a +
+/*
+ b 3 a * 3 * +
+ 
+ 1.  3 a 1
+ 
+ 2.  9 a 1
+ 
+ 3.  9 a 1
+     1 b 1
+ ==============
+ b 3 a * + 3 *
+ 
+ 1. 3 a 1
+ 
+ 2. 3 a 1
+    1 b 1
+ 
+ 3  9 a 1
+    3 b 1
+ ==============
+ b 3 a * 3 * + b +
+
+ 1. 3 a 1
+ 2. 9 a 1
+ 3. 9 a 1
+    1 b 1
+ 4  9 a 1
+    2 b 1
+ =============
+ a b + a +
+ 
+ 1. 1 a 1
+    1 b 1
+ 2. 2 a 1 
+    1 b 1
+ */
+
 int main(int argc, char **argv){
-    CURRENT_INPUT_STR="100";
+    CURRENT_INPUT_STR="2*(2+a)*3";
     struct TOKEN *token=Walley_MATH_Lexica_Analysis(CURRENT_INPUT_STR);
     TOKEN_PrintTOKEN(token);
     char *postfix=WALLEY_MATH_Infix_to_Postfix(token);

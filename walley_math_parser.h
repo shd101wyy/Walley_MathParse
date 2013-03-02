@@ -44,6 +44,9 @@
  
  */
 
+bool JUST_INIT_MATH_LIST=TRUE;
+struct Math_Data_Array MDA;
+
 double Walley_Operator(double num1,double num2,char sign){
     double output=0;
     if (sign == '*') {
@@ -118,10 +121,6 @@ int find_not_in_parenthesis(char *from_str, char *find_str) {
         // I add one code here.
         find_index=TRUE;
         if (from_str[i] == find_str[0] && charIsInParenthesis(from_str,i)==FALSE) {
-            //printf("Find The same\n");
-            //printf("%c\n",from_str[i]);
-            //char *temp = substr(from_str, i, i + (int) strlen(find_str));
-            //printf("############%d\n",i);
             for (j = 0; j < (int) strlen(find_str); j++) {
                 //printf("Find_Str[j] %c From_Str[i+j] %c\n",find_str[j],from_str[i+j]);
                 if (find_str[j] != from_str[i + j]) {
@@ -141,9 +140,132 @@ int find_not_in_parenthesis(char *from_str, char *find_str) {
     return index;
 }
 
+
+// x---> 1 x 1
+// 12--> 12 0 1
+struct Math_Data changeValueToMathDate(char *value){
+    struct Math_Data md;
+    if (stringHasAlpha(value)==TRUE) {
+        md.coefficient="1";
+        md.value=value;
+        md.power="1";
+    }
+    else{
+        md.coefficient=value;
+        md.value="0";
+        md.power="1";
+    }
+    return md;
+}
+
+void MDL_operator(struct Math_Data_List *mdl, struct Math_Data md, char sign){
+    printf("MDL_operator\n");
+    MDL_PrintMathDataList(*mdl);
+    printf("========\n");
+    printf("%s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
+    printf("========\n");
+    
+    int length=(*mdl).length;
+    if (sign=='+' || sign=='-') {
+        
+        int i=0;
+        bool find_same_symbol=FALSE;
+        for (; i<length; i++) {
+            // find same symbol or number
+            if (strcmp((*mdl).math_data_list[i].value,md.value)==0) {
+                find_same_symbol=TRUE;
+                (*mdl).math_data_list[i].coefficient= cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[i].coefficient), atof(md.coefficient), sign)));
+            }
+        }
+        if (find_same_symbol==FALSE) {
+            if (sign=='-') {
+                md.coefficient=append("-", md.coefficient);
+            }
+            MDL_addMathData(mdl, md);
+        }
+    }
+    else if(sign=='*'||sign=='/'){
+        
+        if (length==1) {
+            (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+            if (stringHasAlpha(md.value)==TRUE) {
+                if (stringHasAlpha((*mdl).math_data_list[length-1].value)==TRUE) {
+                    
+                    if (sign=='*') {
+                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("*", md.value));
+                        
+                    }
+                    else{
+                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
+                        
+                    }
+                    
+                }
+                else{
+                    (*mdl).math_data_list[length-1].value=md.value;
+                }
+            }
+
+        }
+        else{
+            char *temp_string=MDL_changeMathDataListToString((*mdl));
+            temp_string=append("(", append(temp_string, ")"));
+            (*mdl).math_data_list=(struct Math_Data*)realloc((*mdl).math_data_list, sizeof(struct Math_Data)*1);
+            (*mdl).length=1;
+            if (strcmp(md.value, "0")==0) {
+                (*mdl).math_data_list[0].coefficient=md.coefficient;
+                (*mdl).math_data_list[0].value=temp_string;
+            }
+            else{
+                (*mdl).math_data_list[0].coefficient=temp_string;
+                (*mdl).math_data_list[0].value=md.value;
+            }
+            
+            
+            
+        }
+    }
+    // 3^a
+    // a^3
+    else{
+        (*mdl).math_data_list[length-1].power=md.value;
+    }
+    
+    printf("output=======\n");
+    MDL_PrintMathDataList(*mdl);
+    printf("\n\n");
+
+}
+
+
 char *Walley_Math_Operator(char *value1, char *value2, char sign){
     printf("decimal %s %s %c\n",value1,value2,sign);
-    if (stringIsDigit(value1)==TRUE) {
+    
+    if (JUST_INIT_MATH_LIST==TRUE) {
+        printf("Enter Here\n");
+        
+        struct Math_Data md1=changeValueToMathDate(value1);
+        MDL_addMathData(&(MDA.mdl[0]), md1);
+        
+        struct Math_Data md2=changeValueToMathDate(value2);
+        
+        MDL_operator(&(MDA.mdl[0]), md2, sign);
+        
+        JUST_INIT_MATH_LIST=FALSE;
+        
+        return "MDL";
+    }
+    
+    else{
+        if (strcmp(value1, "MDL")==0) {
+            printf("\n\nit is MDL\n");
+            struct Math_Data md2=changeValueToMathDate(value2);
+            MDL_operator(&(MDA.mdl[0]), md2, sign);
+            return "MDL";
+        }
+        
+        
+        if (stringIsDigit(value1)==TRUE) {
         
         // both value1 and value2 is digit
         if (stringIsDigit(value2)==TRUE) {
@@ -209,7 +331,7 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
         
     }
     
-    else{
+        else{
         //3*a 4 *
         if (stringIsDigit(value2)==TRUE) {
             //a   + 5
@@ -291,6 +413,8 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
             }
             return append(value1, append(charToString(sign), value2));
         }
+    }
+        
     }
 }
 
@@ -413,9 +537,19 @@ char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
 }
 
 
+
 // only supports decimal now
 // the input_str is the postfix notation
 char *Walley_Math_Parser_Decimal(char *input_str){
+    JUST_INIT_MATH_LIST=TRUE;
+    MDA_init(&MDA);
+    // MDA_0
+    // MDA_1
+    // MDA_2
+    // ....
+    
+    
+    
     int start=0;
     int end=find(input_str, " ");
     char **stack;
@@ -428,14 +562,68 @@ char *Walley_Math_Parser_Decimal(char *input_str){
         char *temp_str=substr(input_str, start, end);
         // it is sign
         if (isSign(temp_str[0])==TRUE) {
-            char *value1=Str_PopString(&stack);
+            char sign=temp_str[0];
             char *value2=Str_PopString(&stack);
+            char *value1=Str_PopString(&stack);
       
             if (stack[0]==NULL) {
-                return append("-", cleanDotZeroAfterNum(value1));
+                return append("-", cleanDotZeroAfterNum(value2));
             }
-                        
-            char *output_str=Walley_Math_Operator(value2,value1, temp_str[0]);
+            
+            char *output_str;
+            if (find(value1, "MDA_")==0 && find(value2, "MDA_")==0) {
+                printf("\nThey Are Both MDA\n");
+                int mda_index1=atoi(substr(value1, 4, (int)strlen(value1)));
+                int mda_index2=atoi(substr(value2, 4, (int)strlen(value2)));
+                
+                struct Math_Data_List mdl1=MDA.mdl[mda_index1];
+                struct Math_Data_List mdl2=MDA.mdl[mda_index2];
+                
+                int length_of_mdl2=mdl2.length;
+                
+                int i=0;
+                for (; i<length_of_mdl2; i++) {
+                    MDL_operator(&mdl1, mdl2.math_data_list[i], sign);
+                }
+                
+                MDA_pop(&MDA);
+                MDA.mdl[mda_index1]=mdl1;
+                
+                output_str=value1;
+            }
+            else if (find(value1, "MDA_")==0) {
+                int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
+                printf("\n\nit is MDL\n");
+                struct Math_Data md2=changeValueToMathDate(value2);
+                MDL_operator(&(MDA.mdl[mda_index]), md2, sign);
+                output_str=value1;
+            }
+            else if(find(value2, "MDA_")==0){
+                int mda_index=atoi(substr(value2, 4, (int)strlen(value2)));
+                struct Math_Data md1=changeValueToMathDate(value1);
+                MDL_operator(&(MDA.mdl[mda_index]), md1, sign);
+                output_str=value2;
+
+            }
+            else{
+                
+                struct Math_Data_List temp_mdl;
+                MDL_init(&temp_mdl);
+                
+                struct Math_Data md1=changeValueToMathDate(value1);
+                MDL_addMathData(&temp_mdl, md1);
+                
+                struct Math_Data md2=changeValueToMathDate(value2);
+                
+                MDL_operator(&(temp_mdl), md2, sign);
+                
+                JUST_INIT_MATH_LIST=FALSE;
+                
+                MDA_addMathDataList(&MDA, temp_mdl);
+                
+                output_str=append("MDA_", intToCString(MDA.length-1));
+
+            }
             printf("----> %s\n",output_str);
             Str_addString(&stack, output_str);
             
@@ -450,8 +638,13 @@ char *Walley_Math_Parser_Decimal(char *input_str){
         end=find_from_index(input_str, " ", start);
     }
     
+    MDL_changeMathDataListToString(MDA.mdl[0]);
+    
     return cleanDotZeroAfterNum(Str_PopString(&stack));
 }
+
+
+
 
 char *Walley_Math_Parser_Fraction(char *input_str){
     int start=0;
