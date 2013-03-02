@@ -158,8 +158,8 @@ struct Math_Data changeValueToMathDate(char *value){
     return md;
 }
 
-void MDL_operator(struct Math_Data_List *mdl, struct Math_Data md, char sign){
-    printf("MDL_operator\n");
+void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, char sign){
+    printf("MDL_operator_for_decimal\n");
     MDL_PrintMathDataList(*mdl);
     printf("========\n");
     printf("%s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
@@ -237,7 +237,86 @@ void MDL_operator(struct Math_Data_List *mdl, struct Math_Data md, char sign){
 
 }
 
+void MDL_operator_for_fraction(struct Math_Data_List *mdl, struct Math_Data md, char sign){
+    printf("MDL_operator_for_fraction\n");
+    MDL_PrintMathDataList(*mdl);
+    printf("========\n");
+    printf("%s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
+    printf("========\n");
+    
+    int length=(*mdl).length;
+    if (sign=='+' || sign=='-') {
+        
+        int i=0;
+        bool find_same_symbol=FALSE;
+        for (; i<length; i++) {
+            // find same symbol or number
+            if (strcmp((*mdl).math_data_list[i].value,md.value)==0) {
+                find_same_symbol=TRUE;
+                (*mdl).math_data_list[i].coefficient= cleanDotZeroAfterNum(Walley_Operator_For_Fraction((*mdl).math_data_list[i].coefficient, md.coefficient, sign));
+            }
+        }
+        if (find_same_symbol==FALSE) {
+            if (sign=='-') {
+                md.coefficient=append("-", md.coefficient);
+            }
+            MDL_addMathData(mdl, md);
+        }
+    }
+    else if(sign=='*'||sign=='/'){
+        
+        if (length==1) {
+            (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(Walley_Operator_For_Fraction((*mdl).math_data_list[length-1].coefficient, md.coefficient, sign));
+            if (stringHasAlpha(md.value)==TRUE) {
+                if (stringHasAlpha((*mdl).math_data_list[length-1].value)==TRUE) {
+                    
+                    if (sign=='*') {
+                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("*", md.value));
+                        
+                    }
+                    else{
+                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
+                        
+                    }
+                    
+                }
+                else{
+                    (*mdl).math_data_list[length-1].value=md.value;
+                }
+            }
+            
+        }
+        else{
+            char *temp_string=MDL_changeMathDataListToString((*mdl));
+            temp_string=append("(", append(temp_string, ")"));
+            (*mdl).math_data_list=(struct Math_Data*)realloc((*mdl).math_data_list, sizeof(struct Math_Data)*1);
+            (*mdl).length=1;
+            if (strcmp(md.value, "0")==0) {
+                (*mdl).math_data_list[0].coefficient=md.coefficient;
+                (*mdl).math_data_list[0].value=temp_string;
+            }
+            else{
+                (*mdl).math_data_list[0].coefficient=temp_string;
+                (*mdl).math_data_list[0].value=md.value;
+            }
+            
+            
+            
+        }
+    }
+    // 3^a
+    // a^3
+    else{
+        (*mdl).math_data_list[length-1].power=md.value;
+    }
+    
+    printf("output=======\n");
+    MDL_PrintMathDataList(*mdl);
+    printf("\n\n");
+    
+}
 
+/*
 char *Walley_Math_Operator(char *value1, char *value2, char sign){
     printf("decimal %s %s %c\n",value1,value2,sign);
     
@@ -249,7 +328,7 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
         
         struct Math_Data md2=changeValueToMathDate(value2);
         
-        MDL_operator(&(MDA.mdl[0]), md2, sign);
+        MDL_operator_for_decimal(&(MDA.mdl[0]), md2, sign);
         
         JUST_INIT_MATH_LIST=FALSE;
         
@@ -260,7 +339,7 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
         if (strcmp(value1, "MDL")==0) {
             printf("\n\nit is MDL\n");
             struct Math_Data md2=changeValueToMathDate(value2);
-            MDL_operator(&(MDA.mdl[0]), md2, sign);
+            MDL_operator_for_decimal(&(MDA.mdl[0]), md2, sign);
             return "MDL";
         }
         
@@ -418,7 +497,6 @@ char *Walley_Math_Operator(char *value1, char *value2, char sign){
     }
 }
 
-
 char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
     printf("fraction %s %s %c\n",value1,value2,sign);
     if (stringIsDigit(value1)==TRUE) {
@@ -535,7 +613,7 @@ char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
         }
     }
 }
-
+ */
 
 
 // only supports decimal now
@@ -583,7 +661,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 
                 int i=0;
                 for (; i<length_of_mdl2; i++) {
-                    MDL_operator(&mdl1, mdl2.math_data_list[i], sign);
+                    MDL_operator_for_decimal(&mdl1, mdl2.math_data_list[i], sign);
                 }
                 
                 MDA_pop(&MDA);
@@ -595,13 +673,13 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
                 printf("\n\nit is MDL\n");
                 struct Math_Data md2=changeValueToMathDate(value2);
-                MDL_operator(&(MDA.mdl[mda_index]), md2, sign);
+                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md2, sign);
                 output_str=value1;
             }
             else if(find(value2, "MDA_")==0){
                 int mda_index=atoi(substr(value2, 4, (int)strlen(value2)));
                 struct Math_Data md1=changeValueToMathDate(value1);
-                MDL_operator(&(MDA.mdl[mda_index]), md1, sign);
+                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md1, sign);
                 output_str=value2;
 
             }
@@ -615,7 +693,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 
                 struct Math_Data md2=changeValueToMathDate(value2);
                 
-                MDL_operator(&(temp_mdl), md2, sign);
+                MDL_operator_for_decimal(&(temp_mdl), md2, sign);
                 
                 JUST_INIT_MATH_LIST=FALSE;
                 
@@ -659,15 +737,69 @@ char *Walley_Math_Parser_Fraction(char *input_str){
         char *temp_str=substr(input_str, start, end);
         // it is sign
         if (isSign(temp_str[0])==TRUE) {
-            char *value1=Str_PopString(&stack);
+            char sign=temp_str[0];
             char *value2=Str_PopString(&stack);
-            
+            char *value1=Str_PopString(&stack);
             
             if (stack[0]==NULL) {
-                return append("-", cleanDotZeroAfterNum(value1));
+                return append("-", cleanDotZeroAfterNum(value2));
             }
             
-            char *output_str=Walley_Math_Operator_For_Fraction(value2,value1, temp_str[0]);
+            char *output_str;
+            if (find(value1, "MDA_")==0 && find(value2, "MDA_")==0) {
+                printf("\nThey Are Both MDA\n");
+                int mda_index1=atoi(substr(value1, 4, (int)strlen(value1)));
+                int mda_index2=atoi(substr(value2, 4, (int)strlen(value2)));
+                
+                struct Math_Data_List mdl1=MDA.mdl[mda_index1];
+                struct Math_Data_List mdl2=MDA.mdl[mda_index2];
+                
+                int length_of_mdl2=mdl2.length;
+                
+                int i=0;
+                for (; i<length_of_mdl2; i++) {
+                    MDL_operator_for_fraction(&mdl1, mdl2.math_data_list[i], sign);
+                }
+                
+                MDA_pop(&MDA);
+                MDA.mdl[mda_index1]=mdl1;
+                
+                output_str=value1;
+            }
+            else if (find(value1, "MDA_")==0) {
+                int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
+                printf("\n\nit is MDL\n");
+                struct Math_Data md2=changeValueToMathDate(value2);
+                MDL_operator_for_fraction(&(MDA.mdl[mda_index]), md2, sign);
+                output_str=value1;
+            }
+            else if(find(value2, "MDA_")==0){
+                int mda_index=atoi(substr(value2, 4, (int)strlen(value2)));
+                struct Math_Data md1=changeValueToMathDate(value1);
+                MDL_operator_for_fraction(&(MDA.mdl[mda_index]), md1, sign);
+                output_str=value2;
+                
+            }
+            else{
+                
+                struct Math_Data_List temp_mdl;
+                MDL_init(&temp_mdl);
+                
+                struct Math_Data md1=changeValueToMathDate(value1);
+                MDL_addMathData(&temp_mdl, md1);
+                
+                struct Math_Data md2=changeValueToMathDate(value2);
+                
+                MDL_operator_for_fraction(&(temp_mdl), md2, sign);
+                
+                JUST_INIT_MATH_LIST=FALSE;
+                
+                MDA_addMathDataList(&MDA, temp_mdl);
+                
+                output_str=append("MDA_", intToCString(MDA.length-1));
+                
+            }
+            printf("----> %s\n",output_str);
             Str_addString(&stack, output_str);
             
         }
