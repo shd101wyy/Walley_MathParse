@@ -53,7 +53,7 @@
 int main(int argc, char **argv){
     printf("%d\n",strcmp("a", "b"));
     //CURRENT_INPUT_STR="(a*b/a*a/a+3*b)*2";
-    CURRENT_INPUT_STR="a*a/a*a/b+6*b";
+    CURRENT_INPUT_STR="2+4";
     struct TOKEN *token=Walley_MATH_Lexica_Analysis(CURRENT_INPUT_STR);
     TOKEN_PrintTOKEN(token);
     char *postfix=WALLEY_MATH_Infix_to_Postfix(token);

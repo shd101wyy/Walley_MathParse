@@ -911,6 +911,9 @@ char *Walley_Math_Parser_Decimal(char *input_str){
     printf("ENDING\n");
     
     char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
+    if (stringIsEmpty(output)) {
+        output=Str_PopString(&stack);
+    }
     //return cleanDotZeroAfterNum(Str_PopString(&stack));
     return output;
 }
@@ -1010,6 +1013,9 @@ char *Walley_Math_Parser_Fraction(char *input_str){
     }
     
     char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
+    if (stringIsEmpty(output)) {
+        output=Str_PopString(&stack);
+    }
     //return cleanDotZeroAfterNum(Str_PopString(&stack));
     return output;
 }
