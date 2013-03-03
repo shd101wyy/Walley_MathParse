@@ -331,6 +331,7 @@ struct Math_Data_Array{
     struct Math_Data_List *mdl;
 };
 void MDA_init(struct Math_Data_Array *mda){
+    (*mda).length=0;
     (*mda).mdl=(struct Math_Data_List*)malloc(sizeof(struct Math_Data_List)*1);
     MDL_init(&((*mda).mdl[0]));
 }
