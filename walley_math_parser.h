@@ -293,7 +293,14 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                                         (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
                                     }
                                     else{
-                                        (*mdl).math_data_list[length-1].value=append(substr(temp_value, 0, smallest_end_index), append("/", append(md.value,substr(temp_value, smallest_end_index, (int)strlen(temp_value)))));
+                                        
+                                        char *append_power=append("^(", append((*mdl).math_data_list[length-1].power, ")"));
+                                        if (strcmp((*mdl).math_data_list[length-1].power, "1")==0) {
+                                            append_power="";
+                                        }
+                                        (*mdl).math_data_list[length-1].value=append(substr(temp_value, 0, smallest_end_index),append(append_power,append("/", append(md.value,substr(temp_value, smallest_end_index, (int)strlen(temp_value))))));
+                                        printf("@@@@ %s\n",(*mdl).math_data_list[length-1].value);
+                                        (*mdl).math_data_list[length-1].power="1";
                                     }
 
                                 }
@@ -900,6 +907,8 @@ char *Walley_Math_Parser_Decimal(char *input_str){
         start=end+1;
         end=find_from_index(input_str, " ", start);
     }
+    
+    printf("ENDING\n");
     
     char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
     //return cleanDotZeroAfterNum(Str_PopString(&stack));
