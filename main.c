@@ -51,7 +51,8 @@
  */
 
 int main(int argc, char **argv){
-    CURRENT_INPUT_STR="3^a";
+    printf("%d\n",strcmp("a", "b"));
+    CURRENT_INPUT_STR="a*b/a*a";
     struct TOKEN *token=Walley_MATH_Lexica_Analysis(CURRENT_INPUT_STR);
     TOKEN_PrintTOKEN(token);
     char *postfix=WALLEY_MATH_Infix_to_Postfix(token);
