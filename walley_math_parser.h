@@ -289,8 +289,32 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
     }
     // 3^a
     // a^3
+    // 3^3
     else{
-        (*mdl).math_data_list[length-1].power=md.value;
+        // a^3
+        // a^a
+        if (stringHasAlpha((*mdl).math_data_list[length-1].value)==TRUE) {
+            if (strcmp(md.value, "0")==0) {
+                // a^3
+                (*mdl).math_data_list[length-1].power=md.coefficient;
+
+            }
+            else{
+                (*mdl).math_data_list[length-1].power=md.value;
+            }
+        }
+        
+        // 3^a
+        // 3^2
+        else{
+            if (strcmp(md.value, "0")==0) {
+
+                (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+            }
+            else{
+                (*mdl).math_data_list[length-1].power=md.value;
+            }
+        }
     }
     
     printf("output=======\n");

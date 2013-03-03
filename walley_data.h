@@ -388,6 +388,15 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
         char *power=mdl.math_data_list[i].power;
         if(strcmp(value,"0")==0){
             output_str=append(output_str, coef);
+            if(strcmp(power, "1")!=0){
+                if(stringIsDigit(power)){
+                    output_str=append(output_str, append("^", power));
+                }
+                else{
+                    output_str=append(output_str, append("^(", append(power,")")));
+                }
+        
+            }
         }
         else{
             if(strcmp(coef, "1")!=0){
