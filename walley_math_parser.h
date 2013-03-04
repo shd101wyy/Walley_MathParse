@@ -43,9 +43,8 @@
  1 2 + 4 * 5 + 3 −
  
  */
-
+char *Walley_Math_Parser_Decimal(char *input_str);
 bool JUST_INIT_MATH_LIST=TRUE;
-struct Math_Data_Array MDA;
 
 double Walley_Operator(double num1,double num2,char sign){
     double output=0;
@@ -162,7 +161,7 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
     printf("MDL_operator_for_decimal\n");
     MDL_PrintMathDataList(*mdl);
     printf("========\n");
-    printf("%s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
+    printf("md %s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
     printf("========\n");
     
     int length=(*mdl).length;
@@ -188,7 +187,70 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
         
         if (length==1) {
             printf("Length is 1\n");
-            (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+            
+            //=================================
+            // Calculate Coef
+            if (stringHasAlpha((*mdl).math_data_list[length-1].coefficient)) {
+                //  mdl b
+                //  md  a
+                // or
+                //  md  1
+                if (stringHasAlpha(md.coefficient)) {
+                    (*mdl).math_data_list[length-1].value=md.value;
+                    char *coef=append("(", append(md.coefficient, ")"));
+                    coef=append(coef, charToString(sign));
+                    coef=append(coef,append("(", append((*mdl).math_data_list[length-1].coefficient, ")")));
+                    printf("coef--------> %s\n",coef);
+                    struct TOKEN *tl=Walley_MATH_Lexica_Analysis(coef);
+                    char *postfix=WALLEY_MATH_Infix_to_Postfix(tl);
+                    char *new_coef=Walley_Math_Parser_Decimal(postfix);
+                    printf("new_coef----> %s\n",new_coef);
+                    (*mdl).math_data_list[length-1].coefficient=new_coef;
+                }
+                else{
+                    char *coef1=md.coefficient;
+                    char *sign_string=charToString(sign);
+                    if (hasSign(coef1)) {
+                        coef1=append("(", append(coef1, ")"));
+                    }
+                    if (sign=='*' && strcmp("1", md.coefficient)==0) {
+                        coef1="";
+                        sign_string="";
+                    }
+                    
+                    char *coef2=(*mdl).math_data_list[length-1].coefficient;
+                    if (hasSign(coef2)) {
+                        coef2=append("(", append(coef2, ")"));
+                    }
+                    (*mdl).math_data_list[length-1].coefficient=append(coef1, append(sign_string, coef2));
+                }
+            }
+            else{
+                // mdl 3
+                // md  a
+                // or
+                // md  3
+                if (stringHasAlpha(md.coefficient)) {
+                    char *coef1=md.coefficient;
+                    if (hasSign(coef1)) {
+                        coef1=append("(", append(coef1, ")"));
+                    }
+                    char *coef2=(*mdl).math_data_list[length-1].coefficient;
+                    if (hasSign(coef2)) {
+                        coef2=append("(", append(coef2, ")"));
+                    }
+                    (*mdl).math_data_list[length-1].coefficient=append(coef1, append(charToString(sign), coef2));
+                }
+                else{
+                    (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+                }
+            }
+            
+            //Finish Calculating Coef=================================
+
+            
+            
+            
             if (stringHasAlpha(md.value)==TRUE) {
                 if (stringHasAlpha((*mdl).math_data_list[length-1].value)==TRUE) {
                     
@@ -291,7 +353,27 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                                     }
                                     
                                     if (can_be_smaller_one==FALSE) {
-                                        (*mdl).math_data_list[length-1].value=append((*mdl).math_data_list[length-1].value, append("/", md.value));
+                                        printf("Here2\n");
+                                        //(*mdl).math_data_list[length-1].value=append(md.value, append("/",(*mdl).math_data_list[length-1].value));
+                                        
+           
+                                        
+                                        char *t=MD_changeMathDataToList((*mdl).math_data_list[length-1]);
+                                        
+                                        printf("--*** %s\n",append((*mdl).math_data_list[length-1].coefficient, append("/", t)));
+                                        
+                                        
+                                        struct TOKEN *tl=Walley_MATH_Lexica_Analysis(append((*mdl).math_data_list[length-1].coefficient, append("/", t)));
+                                        char *postfix=WALLEY_MATH_Infix_to_Postfix(tl);
+                                        
+                                        (*mdl).math_data_list[length-1].coefficient=Walley_Math_Parser_Decimal(postfix);
+                                        
+                                        printf("--*** %s\n",(*mdl).math_data_list[length-1].coefficient);
+                                        
+                                        (*mdl).math_data_list[length-1].value=md.value;
+
+                                        MDL_PrintMathDataList(*mdl);
+                                        
                                     }
                                     else{
                                         
@@ -337,8 +419,33 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     
                 }
                 else{
-                    (*mdl).math_data_list[length-1].value=md.value;
+                    printf("ENTER ELSE 3\n");
+                    if (sign=='*') {
+                        (*mdl).math_data_list[length-1].value=md.value;
+                        (*mdl).math_data_list[length-1].power=md.power;
+                    }
+                    else{
+                        
+                    }
                 }
+            }
+            else{
+                printf("ENTER ELSE\n");
+                if (stringHasAlpha((*mdl).math_data_list[length-1].value)==TRUE){
+                    if (sign=='*') {
+                        
+                    }
+                    // /
+                    else{
+                        printf("ENTER ELSE 2\n");
+                        char *t=MD_changeMathDataToList((*mdl).math_data_list[length-1]);
+                        (*mdl).math_data_list[length-1].value=md.value;
+                        (*mdl).math_data_list[length-1].power=md.power;
+                        (*mdl).math_data_list[length-1].coefficient=append( (*mdl).math_data_list[length-1].coefficient, append("/", t));
+                        
+                    }
+                }
+                
             }
 
         }
@@ -920,6 +1027,7 @@ char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
 // the input_str is the postfix notation
 char *Walley_Math_Parser_Decimal(char *input_str){
     JUST_INIT_MATH_LIST=TRUE;
+    struct Math_Data_Array MDA;
     MDA_init(&MDA);
     // MDA_0
     // MDA_1
@@ -971,16 +1079,25 @@ char *Walley_Math_Parser_Decimal(char *input_str){
             }
             else if (find(value1, "MDA_")==0) {
                 int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
-                printf("\n\nit is MDL\n");
+                printf("\n\nValue1 is MDL\n");
                 struct Math_Data md2=changeValueToMathDate(value2);
                 MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md2, sign);
                 output_str=value1;
             }
             else if(find(value2, "MDA_")==0){
+                printf("\n\nValue2 is MDL %s\n",value2);
+
                 int mda_index=atoi(substr(value2, 4, (int)strlen(value2)));
                 struct Math_Data md1=changeValueToMathDate(value1);
+                
+                                
                 MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md1, sign);
                 output_str=value2;
+                
+                printf("\nFinish Value2 is MDL %s\n",value2);
+                
+                MDL_PrintMathDataList(MDA.mdl[mda_index]);
+
 
             }
             else{
@@ -1017,7 +1134,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
     }
     
     printf("ENDING\n");
-    
+    MDL_PrintMathDataList(MDA.mdl[0]);
     char *output=MDL_changeMathDataListToString(MDA.mdl[0]);
     if (stringIsEmpty(output)) {
         output=Str_PopString(&stack);
@@ -1030,6 +1147,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
 
 
 char *Walley_Math_Parser_Fraction(char *input_str){
+    struct Math_Data_Array MDA;
     MDA_init(&MDA);
 
     int start=0;
@@ -1075,12 +1193,13 @@ char *Walley_Math_Parser_Fraction(char *input_str){
             }
             else if (find(value1, "MDA_")==0) {
                 int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
-                printf("\n\nit is MDL\n");
+                printf("\n\nValue1 is MDL\n");
                 struct Math_Data md2=changeValueToMathDate(value2);
                 MDL_operator_for_fraction(&(MDA.mdl[mda_index]), md2, sign);
                 output_str=value1;
             }
             else if(find(value2, "MDA_")==0){
+                printf("\n\nValue2 is MDL\n");
                 int mda_index=atoi(substr(value2, 4, (int)strlen(value2)));
                 struct Math_Data md1=changeValueToMathDate(value1);
                 MDL_operator_for_fraction(&(MDA.mdl[mda_index]), md1, sign);

@@ -7,7 +7,7 @@
 //
 
 #include "walley_string.h"
-
+bool hasSign(char *input_str);
 struct VAR{
     char *var_name;
     char *var_value;
@@ -405,10 +405,19 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
                     output_str=append(output_str, "-");
                 }
                 else{
+                    if (hasSign(coef)) {
+                        coef=append("(", append(coef, ")"));
+                    }
                     output_str=append(output_str, append(coef,"*"));
                 }
             }
-            output_str=append(output_str, value);
+            if (hasSign(value)) {
+                output_str=append(append(output_str,"("), append(value,")"));
+            }
+            else{
+                output_str=append(output_str, value);
+            }
+            
             if(strcmp(power, "1")!=0){
                 if(stringIsDigit(power)){
                     output_str=append(output_str, append("^", power));
@@ -426,4 +435,35 @@ printf("OUTPUT_STR-----> %s\n",output_str);
     return output_str;
 }
 
+char *MD_changeMathDataToList(struct Math_Data md){
+    char *power_string="";
+    char *coefficient_string="";
+    if (strcmp("1", md.power)==0) {
+        
+    }
+    else{
+        
+        if (stringIsDigit(md.power)) {
+            power_string=append("^",md.power);
+        }
+        else
+            power_string=append("^(", append(md.power, ")"));
+    }
+    
+    if (strcmp("1",md.coefficient)==0) {
+        
+    }
+    else{
+        coefficient_string=append(md.coefficient, "*");
+    }
+    char *value="";
+    if (hasSign(md.value)) {
+        value=append("(", append(md.value, ")"));
+    }
+    else
+        value=md.value;
+    printf("md to string---> %s\n",append(coefficient_string, append(value,power_string)));
+    return append(coefficient_string, append(value,power_string));
+    
 
+}
