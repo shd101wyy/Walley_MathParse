@@ -381,12 +381,12 @@ int TOKEN_indexOfFirstNoneWhiteSpaceToken(struct TOKEN *token){
     exit(0);
 }
 
-int TOKEN_length(struct TOKEN *token){
+int TL_length(struct TOKEN *token){
     int length=0;
     if (strcmp((token)->TOKEN_CLASS,"__size_of_array__")!=0) {
         printf("@@ |%s|\n",CURRENT_INPUT_STR);
         
-        printf("TOKEN_length..Can not find __size_of_array__");
+        printf("TL_length..Can not find __size_of_array__");
         exit(0);
     }
     else{
@@ -400,7 +400,7 @@ int TOKEN_length(struct TOKEN *token){
 
 
 int TOKEN_numOfNoneWhitespaces(struct TOKEN *token){
-    int length=TOKEN_length(token);
+    int length=TL_length(token);
     int row=1;
     int num=0;
     while (row<length) {
@@ -415,7 +415,7 @@ int TOKEN_numOfNoneWhitespaces(struct TOKEN *token){
 struct TOKEN *TOKEN_returnTokenWithoutWhitespaces(struct TOKEN *token){
     struct TOKEN *return_token;
     TOKEN_initTOKEN(&return_token);
-    int length=TOKEN_length(token);
+    int length=TL_length(token);
     int row=1;
     while (row<length) {
         if (strcmp("WHITESPACES", token[row].TOKEN_CLASS)!=0) {
