@@ -183,7 +183,19 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
             // find same symbol or number and same power
             if (strcmp((*mdl).math_data_list[i].value,md.value)==0 && strcmp((*mdl).math_data_list[i].power,md.power)==0) {
                 find_same_symbol=TRUE;
+                if (stringHasAlpha(md.coefficient)||stringHasAlpha((*mdl).math_data_list[i].coefficient)) {
+                    printf("HAS ALPHA %s %s\n",(*mdl).math_data_list[i].coefficient,md.coefficient);
+                    if (side=='l') {
+                        (*mdl).math_data_list[i].coefficient=append((*mdl).math_data_list[i].coefficient, append(charToString(sign), md.coefficient));
+                    }
+                    // right side
+                    else{
+                        (*mdl).math_data_list[i].coefficient=append(md.coefficient, append(charToString(sign), (*mdl).math_data_list[i].coefficient));
+                    }
+                }
+                else{
                 (*mdl).math_data_list[i].coefficient= cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[i].coefficient), atof(md.coefficient), sign)));
+                }
             }
         }
         if (find_same_symbol==FALSE) {
@@ -220,7 +232,7 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     char *coef1=md.coefficient;
                     char *sign_string=charToString(sign);
                     if (hasSecondOrderSign(coef1)) {
-                        if (indexOfFinal(coef1, 0)==(int)strlen(coef1)-1) {
+                        if (coef1[0]=='('&&indexOfFinal(coef1, 0)==(int)strlen(coef1)-1) {
                             // coef1 = coef1;
                         }
                         else{
@@ -234,7 +246,7 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     
                     char *coef2=(*mdl).math_data_list[length-1].coefficient;
                     if (hasSecondOrderSign(coef2)) {
-                        if (indexOfFinal(coef2, 0)==(int)strlen(coef2)-1) {
+                        if (coef2[0]=='('&&indexOfFinal(coef2, 0)==(int)strlen(coef2)-1) {
                             // coef2 = coef2;
                         }
                         else{

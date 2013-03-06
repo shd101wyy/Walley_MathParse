@@ -61,7 +61,7 @@ int main(int argc, char **argv){
     printf("%s\n",postfix);
      */
     
-    char *output=Walley_Math_Parser_Decimal_For_Symbolic("a+a*(-3)");
+    char *output=Walley_Math_Parser_Decimal_For_Symbolic("a+a*(-3)/b");
     //postfix 6 a * a 0 4 - * +
     //        6 a * a 4 - * +
 
