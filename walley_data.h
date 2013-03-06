@@ -363,6 +363,8 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
     char *output_str="";
     int length=mdl.length;
     int i=0;
+    
+    // change value order
     for (;i<length ; i++) {
         struct Math_Data left_md=mdl.math_data_list[i];
         int j=i;
@@ -371,6 +373,26 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
         for (; j<length; j++) {
             if (strcmp(smallest_string, mdl.math_data_list[j].value)>0) {
                 smallest_string=mdl.math_data_list[j].value;
+                smallest_md_index=j;
+            }
+        }
+        
+        // swap
+        mdl.math_data_list[i]=mdl.math_data_list[smallest_md_index];
+        mdl.math_data_list[smallest_md_index]=left_md;
+    }
+    
+    
+    // change power order
+    for (i=0;i<length ; i++) {
+        struct Math_Data left_md=mdl.math_data_list[i];
+        int j=i;
+        int smallest_md_index=i;
+        char *smallest_string=left_md.power;
+        char *smallest_value=left_md.value;
+        for (; j<length; j++) {
+            if (strcmp(smallest_value,mdl.math_data_list[j].value)==0 && strcmp(smallest_string, mdl.math_data_list[j].power)>0) {
+                smallest_string=mdl.math_data_list[j].power;
                 smallest_md_index=j;
             }
         }
@@ -454,7 +476,7 @@ printf("OUTPUT_STR-----> %s\n",output_str);
     return output_str;
 }
 
-char *MD_changeMathDataToList(struct Math_Data md){
+char *MD_changeMathDataToString(struct Math_Data md){
     char *power_string="";
     char *coefficient_string="";
     if (strcmp("1", md.power)==0) {

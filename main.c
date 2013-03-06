@@ -61,7 +61,7 @@ int main(int argc, char **argv){
     printf("%s\n",postfix);
      */
     
-    char *output=Walley_Math_Parser_Decimal("a+3*a");
+    char *output=Walley_Math_Parser_Decimal("b^2+2*b^2+b^3+5*b+b*3+a+4");
     //char *output=Walley_Math_Parser_Fraction(postfix);
     printf("## output1---> %s\n",output);
 
