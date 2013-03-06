@@ -8,6 +8,7 @@
 
 #include "walley_string.h"
 bool hasSign(char *input_str);
+int indexOfFinal(char *input_str, int first_index);
 struct VAR{
     char *var_name;
     char *var_value;
@@ -412,7 +413,25 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
                 }
             }
             if (hasSign(value)) {
-                output_str=append(append(output_str,"("), append(value,")"));
+                if (value[0]=='(') {
+                    if (indexOfFinal(value, 0)==(int)strlen(value)-1) {
+                        output_str=append(output_str, value);
+                    }
+                    else{
+                        output_str=append(append(output_str,"("), append(value,")"));
+
+                    }
+                }
+                else
+                {
+                    if (strcmp(coef, "1")==0) {
+                        output_str=append(output_str, value);
+
+                    }
+                    else{
+                    output_str=append(append(output_str,"("), append(value,")"));
+                    }
+                }
             }
             else{
                 output_str=append(output_str, value);
@@ -446,8 +465,9 @@ char *MD_changeMathDataToList(struct Math_Data md){
         if (stringIsDigit(md.power)) {
             power_string=append("^",md.power);
         }
-        else
+        else{
             power_string=append("^(", append(md.power, ")"));
+        }
     }
     
     if (strcmp("1",md.coefficient)==0) {

@@ -162,6 +162,24 @@ int indexOfFinal(char *input_str, int first_index){
         }
         
     }
+    // (
+    else if(first_char=='('){
+        int left=1;
+        int right=0;
+        for (; i<length; i++) {
+            if (input_str[i]=='('&&charIsInString(input_str, i)==FALSE) {
+                left++;
+            }
+            if (input_str[i]==')'&&charIsInString(input_str, i)==FALSE) {
+                right++;
+            }
+            if (left==right) {
+                return i;
+            }
+        }
+        
+    }
+
     // {
     else{
         int left=1;
@@ -424,6 +442,23 @@ struct TOKEN *TOKEN_returnTokenWithoutWhitespaces(struct TOKEN *token){
         row++;
     }
     return return_token;
+}
+
+
+void TL_swapToken(struct TOKEN **tl, int index1, int index2){
+    struct TOKEN temp_token=(*tl)[index1];
+    (*tl)[index1]=(*tl)[index2];
+    (*tl)[index2]=temp_token;
+}
+
+/*===================================
+    Rearrange Expression
+    a*c*b----> a*b*c
+ ====================================
+ */
+char *Math_RearrangeMathExpression(char *math_expression){
+    struct TOKEN *tl=Walley_MATH_Lexica_Analysis(math_expression);
+    
 }
 
 

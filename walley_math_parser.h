@@ -157,11 +157,20 @@ struct Math_Data changeValueToMathDate(char *value){
     return md;
 }
 
-void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, char sign){
+
+/*
+    side:
+        l: mdl / md
+        r: md  / mdl
+ 
+ 
+ */
+void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, char sign, char side){
     printf("MDL_operator_for_decimal\n");
     MDL_PrintMathDataList(*mdl);
     printf("========\n");
     printf("md %s: %s: %s:\n%c\n",md.coefficient,md.value,md.power,sign);
+    printf("side %c\n",side);
     printf("========\n");
     
     int length=(*mdl).length;
@@ -196,14 +205,13 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                 // or
                 //  md  1
                 if (stringHasAlpha(md.coefficient)) {
+                    // has problem here
                     (*mdl).math_data_list[length-1].value=md.value;
                     char *coef=append("(", append(md.coefficient, ")"));
                     coef=append(coef, charToString(sign));
                     coef=append(coef,append("(", append((*mdl).math_data_list[length-1].coefficient, ")")));
                     printf("coef--------> %s\n",coef);
-                    struct TOKEN *tl=Walley_MATH_Lexica_Analysis(coef);
-                    char *postfix=WALLEY_MATH_Infix_to_Postfix(tl);
-                    char *new_coef=Walley_Math_Parser_Decimal(postfix);
+                    char *new_coef=Walley_Math_Parser_Decimal(coef);
                     printf("new_coef----> %s\n",new_coef);
                     (*mdl).math_data_list[length-1].coefficient=new_coef;
                 }
@@ -222,7 +230,17 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     if (hasSign(coef2)) {
                         coef2=append("(", append(coef2, ")"));
                     }
-                    (*mdl).math_data_list[length-1].coefficient=append(coef1, append(sign_string, coef2));
+                    
+                    if (side=='r') {
+                        printf("side is r\n");
+                        md.coefficient=append(coef1, append(sign_string, coef2));
+                        (*mdl).math_data_list[length-1].coefficient="1";
+                    }
+                    else{
+                        printf("side is l\n");
+                        (*mdl).math_data_list[length-1].coefficient=append(coef2, append(sign_string, coef1));
+                        md.coefficient="1";
+                    }
                 }
             }
             else{
@@ -239,16 +257,32 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     if (hasSign(coef2)) {
                         coef2=append("(", append(coef2, ")"));
                     }
-                    (*mdl).math_data_list[length-1].coefficient=append(coef1, append(charToString(sign), coef2));
+                    if (side=='r') {
+                        md.coefficient=append(coef1, append(charToString(sign), coef2));
+                        (*mdl).math_data_list[length-1].coefficient="1";
+                    }
+                    else{
+                        (*mdl).math_data_list[length-1].coefficient=append(coef2, append(charToString(sign), coef1));
+                        md.coefficient="1";
+                    }
                 }
                 else{
-                    (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+                    if (side=='l') {
+                        (*mdl).math_data_list[length-1].coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof((*mdl).math_data_list[length-1].coefficient), atof(md.coefficient), sign)));
+                        md.coefficient="1";
+                    }
+                    else{
+                            md.coefficient=cleanDotZeroAfterNum(numToCString(Walley_Operator(atof(md.coefficient),atof((*mdl).math_data_list[length-1].coefficient),sign)));
+                        (*mdl).math_data_list[length-1].coefficient="1";
+                    }
                 }
             }
             
             //Finish Calculating Coef=================================
 
-            
+            printf("COEF MDL----> %s\n",(*mdl).math_data_list[length-1].coefficient);
+            printf("COEF MD----> %s\n",md.coefficient);
+
             
             
             if (stringHasAlpha(md.value)==TRUE) {
@@ -376,14 +410,39 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                                         
                                     }
                                     else{
-                                        
-                                        char *append_power=append("^(", append((*mdl).math_data_list[length-1].power, ")"));
+                                        printf("ENTER HERE 6\n");
+                                        char *append_power="";
+                                        if (stringIsDigit((*mdl).math_data_list[length-1].power)) {
+                                            append_power=append("^",(*mdl).math_data_list[length-1].power);
+                                        }
+                                        else{
+                                            append_power= append("^(", append((*mdl).math_data_list[length-1].power, ")"));
+
+                                        }
                                         if (strcmp((*mdl).math_data_list[length-1].power, "1")==0) {
                                             append_power="";
                                         }
-                                        (*mdl).math_data_list[length-1].value=append(substr(temp_value, 0, smallest_end_index),append(append_power,append("/", append(md.value,substr(temp_value, smallest_end_index, (int)strlen(temp_value))))));
-                                        printf("@@@@ %s\n",(*mdl).math_data_list[length-1].value);
-                                        (*mdl).math_data_list[length-1].power="1";
+                                        
+                                        
+                                        if (side=='r') {
+                                            printf("side is r\n");
+                                            char *value_to_be_divided=append((*mdl).math_data_list[length-1].value, append_power);
+                                            printf("value_to_be_divided %s\n",value_to_be_divided);
+                                            printf("calculate %s\n",append((*mdl).math_data_list[length-1].coefficient,append("/",value_to_be_divided)));
+                                            (*mdl).math_data_list[length-1].coefficient=Walley_Math_Parser_Decimal(append((*mdl).math_data_list[length-1].coefficient,append("/",value_to_be_divided)));
+                                            printf("coefficient %s\n",(*mdl).math_data_list[length-1].coefficient);
+                                            (*mdl).math_data_list[length-1].value=md.value;
+                                            (*mdl).math_data_list[length-1].power=md.power;
+                                        }
+                                        else{
+                                            printf("side is l\n");
+                                            (*mdl).math_data_list[length-1].value=append(substr(temp_value, 0, smallest_end_index),append(append_power,append("/", append(md.value,substr(temp_value, smallest_end_index, (int)strlen(temp_value))))));
+                                            printf("@@@@ %s\n",(*mdl).math_data_list[length-1].value);
+                                            (*mdl).math_data_list[length-1].power="1";
+
+                                            
+                                        }
+                                        
                                     }
 
                                 }
@@ -436,13 +495,36 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                         
                     }
                     // /
-                    else{
+                    else{                        
                         printf("ENTER ELSE 2\n");
-                        char *t=MD_changeMathDataToList((*mdl).math_data_list[length-1]);
-                        (*mdl).math_data_list[length-1].value=md.value;
-                        (*mdl).math_data_list[length-1].power=md.power;
-                        (*mdl).math_data_list[length-1].coefficient=append( (*mdl).math_data_list[length-1].coefficient, append("/", t));
                         
+                        char *append_power="";
+                        if (stringIsDigit((*mdl).math_data_list[length-1].power)) {
+                            append_power=append("^",(*mdl).math_data_list[length-1].power);
+                        }
+                        else{
+                            append_power= append("^(", append((*mdl).math_data_list[length-1].power, ")"));
+                            
+                        }
+                        if (strcmp((*mdl).math_data_list[length-1].power, "1")==0) {
+                            append_power="";
+                        }
+
+                        if (side=='r') {
+                            printf("side is r\n");
+                            char *value_to_be_divided=(*mdl).math_data_list[length-1].value;
+                            value_to_be_divided=append(value_to_be_divided,append_power);
+                            (*mdl).math_data_list[length-1].coefficient=append(md.coefficient, append("/",value_to_be_divided));
+                            (*mdl).math_data_list[length-1].value=md.value;
+                            (*mdl).math_data_list[length-1].power=md.power;
+                            
+                        }
+                        
+                        else{
+                            printf("side is l\n");
+                            (*mdl).math_data_list[length-1].coefficient=Walley_Math_Parser_Decimal(append((*mdl).math_data_list[length-1].coefficient, append("/", md.coefficient)));
+                        }
+                                                
                     }
                 }
                 
@@ -1024,8 +1106,20 @@ char *Walley_Math_Operator_For_Fraction(char *value1, char *value2, char sign){
 
 
 // only supports decimal now
-// the input_str is the postfix notation
+//// the input_str is the postfix notation
+
+// the input now is not postfix
+// this function fill format postfix
 char *Walley_Math_Parser_Decimal(char *input_str){
+    
+    printf("input_str %s\n",input_str);
+    
+    struct TOKEN *tl=Walley_MATH_Lexica_Analysis(input_str);
+    input_str=WALLEY_MATH_Infix_to_Postfix(tl);
+    // input_str here is postfix
+    
+    printf("postfix %s\n",input_str);
+    
     JUST_INIT_MATH_LIST=TRUE;
     struct Math_Data_Array MDA;
     MDA_init(&MDA);
@@ -1069,7 +1163,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 
                 int i=0;
                 for (; i<length_of_mdl2; i++) {
-                    MDL_operator_for_decimal(&mdl1, mdl2.math_data_list[i], sign);
+                    MDL_operator_for_decimal(&mdl1, mdl2.math_data_list[i], sign,'l');
                 }
                 
                 MDA_pop(&MDA);
@@ -1081,7 +1175,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 int mda_index=atoi(substr(value1, 4, (int)strlen(value1)));
                 printf("\n\nValue1 is MDL\n");
                 struct Math_Data md2=changeValueToMathDate(value2);
-                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md2, sign);
+                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md2, sign,'l');
                 output_str=value1;
             }
             else if(find(value2, "MDA_")==0){
@@ -1091,7 +1185,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 struct Math_Data md1=changeValueToMathDate(value1);
                 
                                 
-                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md1, sign);
+                MDL_operator_for_decimal(&(MDA.mdl[mda_index]), md1, sign,'r');
                 output_str=value2;
                 
                 printf("\nFinish Value2 is MDL %s\n",value2);
@@ -1110,7 +1204,7 @@ char *Walley_Math_Parser_Decimal(char *input_str){
                 
                 struct Math_Data md2=changeValueToMathDate(value2);
                 
-                MDL_operator_for_decimal(&(temp_mdl), md2, sign);
+                MDL_operator_for_decimal(&(temp_mdl), md2, sign,'l');
                 
                 JUST_INIT_MATH_LIST=FALSE;
                 

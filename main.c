@@ -51,31 +51,23 @@
  */
 
 int main(int argc, char **argv){
+    /*
     printf("%d\n",strcmp("a", "b"));
-    CURRENT_INPUT_STR="(a*b/a*a/a+3*b)*2";
+    CURRENT_INPUT_STR="a/a^3";
     //CURRENT_INPUT_STR="a+b+a/b";
     struct TOKEN *token=Walley_MATH_Lexica_Analysis(CURRENT_INPUT_STR);
     TOKEN_PrintTOKEN(token);
     char *postfix=WALLEY_MATH_Infix_to_Postfix(token);
     printf("%s\n",postfix);
+     */
     
-    char *output=Walley_Math_Parser_Decimal(postfix);
+    char *output=Walley_Math_Parser_Decimal("a+3*a");
     //char *output=Walley_Math_Parser_Fraction(postfix);
     printf("## output1---> %s\n",output);
 
     //================ Very Important ===============
     // IT IS CORRECT TO CALCULATE TWICE
-    
-    token=Walley_MATH_Lexica_Analysis(output);
-    postfix=WALLEY_MATH_Infix_to_Postfix(token);
-    printf("%s\n",postfix);
 
-    output=Walley_Math_Parser_Decimal(postfix);
-    
-    printf("## output2---> %s\n",output);
-    
-
-  
     
     return 0;
 }
