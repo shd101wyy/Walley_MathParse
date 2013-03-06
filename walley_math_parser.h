@@ -157,17 +157,7 @@ struct Math_Data changeValueToMathDate(char *value){
     return md;
 }
 
-// check whether has + or -
-bool hasSecondOrderSign(char *input_str){
-    int length=(int)strlen(input_str);
-    int i=0;
-    for (; i<length; i++) {
-        if (input_str[i]=='+'||input_str[i]=='-') {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
+
 
 /*
     side:
@@ -230,7 +220,12 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     char *coef1=md.coefficient;
                     char *sign_string=charToString(sign);
                     if (hasSecondOrderSign(coef1)) {
-                        coef1=append("(", append(coef1, ")"));
+                        if (indexOfFinal(coef1, 0)==(int)strlen(coef1)-1) {
+                            // coef1 = coef1;
+                        }
+                        else{
+                            coef1=append("(", append(coef1, ")"));
+                        }
                     }
                     if (sign=='*' && strcmp("1", md.coefficient)==0) {
                         coef1="";
@@ -239,7 +234,12 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                     
                     char *coef2=(*mdl).math_data_list[length-1].coefficient;
                     if (hasSecondOrderSign(coef2)) {
-                        coef2=append("(", append(coef2, ")"));
+                        if (indexOfFinal(coef2, 0)==(int)strlen(coef2)-1) {
+                            // coef2 = coef2;
+                        }
+                        else{
+                            coef2=append("(", append(coef2, ")"));
+                        }
                     }
                     
                     if (side=='r') {
@@ -254,7 +254,12 @@ void MDL_operator_for_decimal(struct Math_Data_List *mdl, struct Math_Data md, c
                             (*mdl).math_data_list[length-1].coefficient=Walley_Math_Parser_Decimal(append(coef1, append(sign_string, coef2)));
                         }
                         else{
-                            (*mdl).math_data_list[length-1].coefficient=append(coef2, append(sign_string, coef1));
+                            if (strcmp(coef1, "1")==0) {
+                                (*mdl).math_data_list[length-1].coefficient=coef2;
+                            }
+                            else{
+                                (*mdl).math_data_list[length-1].coefficient=append(coef2, append(sign_string, coef1));
+                            }
                         }
                         md.coefficient="1";
                     }

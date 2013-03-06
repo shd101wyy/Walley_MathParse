@@ -358,6 +358,17 @@ struct Math_Data_List MDA_pop(struct Math_Data_Array *mda){
     
     return return_mdl;
 }
+// check whether has + or -
+bool hasSecondOrderSign(char *input_str){
+    int length=(int)strlen(input_str);
+    int i=0;
+    for (; i<length; i++) {
+        if (input_str[i]=='+'||input_str[i]=='-') {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 
 char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
     char *output_str="";
@@ -428,13 +439,18 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
                     output_str=append(output_str, "-");
                 }
                 else{
-                    if (hasSign(coef)) {
-                        coef=append("(", append(coef, ")"));
+                    if (hasSecondOrderSign(coef)) {
+                        if (indexOfFinal(coef, 0)==(int)strlen(coef)-1) {
+                            // coef = coef;
+                        }
+                        else{
+                            coef=append("(", append(coef, ")"));
+                        }
                     }
                     output_str=append(output_str, append(coef,"*"));
                 }
             }
-            if (hasSign(value)) {
+            if (hasSecondOrderSign(value)) {
                 if (value[0]=='(') {
                     if (indexOfFinal(value, 0)==(int)strlen(value)-1) {
                         output_str=append(output_str, value);
@@ -471,6 +487,13 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
         if(i!=length-1)
             output_str=append(output_str, "+");
     }
+    
+    
+    // clean (a+b)  ()
+    while (output_str[0]=='('&&indexOfFinal(output_str, 0)==(int)strlen(output_str)-1) {
+        output_str=substr(output_str, 1, (int)strlen(output_str)-1);
+    }
+    
 output_str=replace(output_str, "+-", "-");
 printf("OUTPUT_STR-----> %s\n",output_str);
     return output_str;
