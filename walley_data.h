@@ -424,7 +424,7 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
         if(strcmp(value,"0")==0){
             output_str=append(output_str, coef);
             if(strcmp(power, "1")!=0){
-                if(stringIsDigit(power)){
+                if(stringIsDigit(power)&&power[0]!='-'){
                     output_str=append(output_str, append("^", power));
                 }
                 else{
@@ -476,7 +476,7 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
             }
             
             if(strcmp(power, "1")!=0){
-                if(stringIsDigit(power)){
+                if(stringIsDigit(power)&&power[0]!='-'){
                     output_str=append(output_str, append("^", power));
                 }
                 else{
