@@ -440,7 +440,7 @@ char *MDL_changeMathDataListToString(struct Math_Data_List mdl){
                 }
                 else{
                     if (hasSecondOrderSign(coef)) {
-                        if (indexOfFinal(coef, 0)==(int)strlen(coef)-1) {
+                        if (coef[0]=='('&&indexOfFinal(coef, 0)==(int)strlen(coef)-1) {
                             // coef = coef;
                         }
                         else{

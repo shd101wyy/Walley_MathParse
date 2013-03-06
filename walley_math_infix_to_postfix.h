@@ -80,6 +80,8 @@
 
  
  
+ "-" (binary minus) becomes the symbol "-"
+ "-" (unary minus) becomes the symbol "Uminus"
  
  */
 

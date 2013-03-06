@@ -21,6 +21,8 @@ struct TOKEN{
     int TOKEN_START;
     int TOKEN_END; // |"Hello"|  index of final "
 };
+int TL_length(struct TOKEN *token);
+
 void TOKEN_PrintTOKEN(struct TOKEN *token){
     int row=1;
     int length=0;
@@ -203,6 +205,19 @@ int indexOfFinal(char *input_str, int first_index){
 
 
 
+struct TOKEN TOKEN_lastToken(struct TOKEN *token, int index){
+    if (index==0) {
+        struct TOKEN token_temp;
+        token_temp.TOKEN_CLASS="None";
+        token_temp.TOKEN_STRING="None";
+        token_temp.TOKEN_START=0;
+        token_temp.TOKEN_END=0;
+        return token_temp;
+    }
+    else
+        return token[index-1];
+}
+
 struct TOKEN* Walley_MATH_Lexica_Analysis(char *input_str){
     struct TOKEN *token=NULL;
     TOKEN_initTOKEN(&token);
@@ -217,6 +232,8 @@ struct TOKEN* Walley_MATH_Lexica_Analysis(char *input_str){
     }
     else if(input_str[0]=='('||input_str[0]==')')
         type='p';
+    else if(isSign(input_str[0]))
+        type='s';
     i=1;
     for(;i<length;i++){
         if (type=='i'){
@@ -274,6 +291,19 @@ struct TOKEN* Walley_MATH_Lexica_Analysis(char *input_str){
                 end=i;
                 char *token_string=substr(input_str, start, end);
                 char *token_class=TOKEN_MATH_analyzeTokenClass(token_string);
+                
+                
+                // solve (-4)*3 problem
+                // change - to 0-
+                if (strcmp("-", token_string)==0) {
+                    int token_length=TL_length(token);
+                    struct TOKEN last_token=token[token_length-1];
+                    if (strcmp("W_ID", last_token.TOKEN_CLASS)!=0 && strcmp("W_NUMBER", last_token.TOKEN_CLASS)!=0) {
+                        TOKEN_addProperty(&token, "W_NUMBER", "0",-1,-1);
+                    }
+                }
+                
+                
                 TOKEN_addProperty(&token, token_class, token_string,start,end-1);
                 start=end;
                 if (input_str[i]==' '||input_str[i]=='\n'||input_str[i]=='\t') {
@@ -449,16 +479,6 @@ void TL_swapToken(struct TOKEN **tl, int index1, int index2){
     struct TOKEN temp_token=(*tl)[index1];
     (*tl)[index1]=(*tl)[index2];
     (*tl)[index2]=temp_token;
-}
-
-/*===================================
-    Rearrange Expression
-    a*c*b----> a*b*c
- ====================================
- */
-char *Math_RearrangeMathExpression(char *math_expression){
-    struct TOKEN *tl=Walley_MATH_Lexica_Analysis(math_expression);
-    
 }
 
 
